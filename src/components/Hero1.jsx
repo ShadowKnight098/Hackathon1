@@ -5,7 +5,12 @@ const Hero = () => {
     <>
     <div className="Box">
         <div className="box1">
-          <h1>tis is home</h1>
+          <div className="Content">
+            <h2>Hello tere</h2>
+          </div>
+          <div className="img">
+            <h2>Hye te</h2>
+          </div>
         </div>
     </div>
     </>

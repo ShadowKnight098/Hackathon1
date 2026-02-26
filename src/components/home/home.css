@@ -1,9 +1,20 @@
 .Box{
     background-color: #010101;
     width: 100%;
+    min-height: 40rem;
+    margin-top: 2rem;
+   padding: 2rem 25rem;
 }
 .box1{
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    gap: 6rem;
+    width: 100%;
+    align-items: center;
     & h1{
-        font-size: 40rem;
+        font-size: 4.8rem;
+        text-align: left;
+
     }
 }
