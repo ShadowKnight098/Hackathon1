@@ -1,0 +1,9 @@
+.Box{
+    background-color: #010101;
+    width: 100%;
+}
+.box1{
+    & h1{
+        font-size: 40rem;
+    }
+}
