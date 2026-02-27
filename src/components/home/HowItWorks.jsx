@@ -9,6 +9,7 @@ import {
 
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import EventIcon from "@mui/icons-material/Event";
+import { motion } from "framer-motion";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 import { Link } from "react-router-dom";
@@ -37,6 +38,10 @@ const steps = [
 export default function HowItWorks() {
   return (
     <Box
+      component={motion.div}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
       sx={{
         width: "100%",
         py: 10,
@@ -66,7 +71,10 @@ export default function HowItWorks() {
 mx={"auto"}>
         {steps.map((step, index) => (
           <Grid item xs={12} md={4} key={index}>
-            <Card
+            <Card   component={motion.div}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}
               sx={{
                 height: "100%",
                 borderRadius: "16px",

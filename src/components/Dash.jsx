@@ -10,9 +10,11 @@ import {
   TableCell,
   TableBody,
   Stack,
+  Divider,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -21,20 +23,26 @@ export default function Dashboard() {
   const [doctorName, setDoctorName] = useState("");
 
   useEffect(() => {
-    // Fetch patients
     const storedPatients =
       JSON.parse(localStorage.getItem("patients")) || [];
     setPatients(storedPatients);
 
-    // Fetch doctor info
     const doctor = JSON.parse(localStorage.getItem("doctor"));
-
-    if (doctor && doctor.doctorName) {
+    if (doctor?.doctorName) {
       setDoctorName(doctor.doctorName);
     }
   }, []);
 
-  // 📊 Stats
+  // Greeting
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12
+      ? "Good Morning"
+      : hour < 18
+      ? "Good Afternoon"
+      : "Good Evening";
+
+  // Stats
   const totalPatients = patients.length;
 
   const todayPatients = patients.filter((p) => {
@@ -42,10 +50,24 @@ export default function Dashboard() {
     return new Date(p.createdAt).toDateString() === today;
   }).length;
 
+  // Disease analytics
+  const diseaseCounts = patients.reduce((acc, patient) => {
+    acc[patient.disease] = (acc[patient.disease] || 0) + 1;
+    return acc;
+  }, {});
+
+  const mostCommonDisease =
+    Object.entries(diseaseCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+    "N/A";
+
   const recentPatients = [...patients].reverse().slice(0, 5);
 
   return (
     <Box
+      component={motion.div}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
       sx={{
         minHeight: "90vh",
         background: "#f8fafc",
@@ -53,69 +75,106 @@ export default function Dashboard() {
         py: 6,
       }}
     >
-      {/* Welcome Section */}
-      <Typography variant="h4" fontWeight="bold" mb={1}>
-        Welcome Dr. {doctorName || "Doctor"}       </Typography>
+      {/* Header */}
+      <Typography variant="h4" fontWeight="bold">
+        {greeting}, Dr. {doctorName || "Doctor"} 👋
+      </Typography>
 
       <Typography sx={{ color: "#64748b", mb: 4 }}>
-        Here’s your clinic overview for today.
+        Here’s your clinic performance overview.
       </Typography>
 
       {/* Stats Cards */}
-      <Grid container spacing={3} mb={5}>
-        <Grid item xs={12} md={6}>
-          <Paper
-            sx={{
-              p: 4,
-              borderRadius: "16px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <Typography variant="h5" fontWeight="bold">
-              {totalPatients}
-            </Typography>
-            <Typography sx={{ color: "#64748b" }}>
-              Total Patients
-            </Typography>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Paper
-            sx={{
-              p: 4,
-              borderRadius: "16px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <Typography variant="h5" fontWeight="bold">
-              {todayPatients}
-            </Typography>
-            <Typography sx={{ color: "#64748b" }}>
-              Patients Today
-            </Typography>
-          </Paper>
-        </Grid>
+      <Grid
+        container
+        spacing={3}
+        mb={5}
+        component={motion.div}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: { staggerChildren: 0.2 },
+          },
+        }}
+      >
+        {[{
+          title: "Total Patients",
+          value: totalPatients,
+        },
+        {
+          title: "Patients Today",
+          value: todayPatients,
+        },
+        {
+          title: "Most Common Disease",
+          value: mostCommonDisease,
+        }].map((card, index) => (
+          <Grid item xs={12} md={4} key={index}>
+            <Paper
+              component={motion.div}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              sx={cardStyle}
+            >
+              <Typography variant="h5" fontWeight="bold">
+                {card.value}
+              </Typography>
+              <Typography sx={{ color: "#64748b" }}>
+                {card.title}
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
       {/* Quick Actions */}
       <Stack direction="row" spacing={2} mb={5}>
         <Button
           variant="contained"
-          sx={{ textTransform: "none" }}
           onClick={() => navigate("/form")}
+          sx={{ textTransform: "none" }}
         >
           ➕ Add Patient
         </Button>
 
         <Button
           variant="outlined"
-          sx={{ textTransform: "none" }}
           onClick={() => navigate("/records")}
+          sx={{ textTransform: "none" }}
         >
           📋 View Records
         </Button>
       </Stack>
+
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Disease Distribution */}
+      <Typography variant="h6" fontWeight="bold" mb={2}>
+        Disease Distribution
+      </Typography>
+
+      <Grid container spacing={2} mb={5}>
+        {Object.entries(diseaseCounts).map(([disease, count]) => (
+          <Grid item xs={12} md={4} key={disease}>
+            <Paper
+              component={motion.div}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              sx={cardStyle}
+            >
+              <Typography fontWeight="bold">{disease}</Typography>
+              <Typography sx={{ color: "#64748b" }}>
+                {count} cases
+              </Typography>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Recent Patients */}
       <Typography variant="h6" fontWeight="bold" mb={2}>
@@ -123,24 +182,18 @@ export default function Dashboard() {
       </Typography>
 
       <Paper
-        sx={{
-          borderRadius: "16px",
-          border: "1px solid #e2e8f0",
-          overflow: "hidden",
-        }}
+        component={motion.div}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        sx={tableStyle}
       >
         <Table>
           <TableHead sx={{ background: "#f1f5f9" }}>
             <TableRow>
-              <TableCell sx={{ fontSize: "16px", fontWeight: 700 }}>
-                Name
-              </TableCell>
-              <TableCell sx={{ fontSize: "16px", fontWeight: 700 }}>
-                Phone
-              </TableCell>
-              <TableCell sx={{ fontSize: "16px", fontWeight: 700 }}>
-                Disease
-              </TableCell>
+              <TableCell sx={headCell}>Name</TableCell>
+              <TableCell sx={headCell}>Phone</TableCell>
+              <TableCell sx={headCell}>Disease</TableCell>
             </TableRow>
           </TableHead>
 
@@ -154,15 +207,9 @@ export default function Dashboard() {
             ) : (
               recentPatients.map((patient) => (
                 <TableRow key={patient.id}>
-                  <TableCell sx={{ fontSize: "15px" }}>
-                    {patient.name}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "15px" }}>
-                    {patient.phone}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "15px" }}>
-                    {patient.disease}
-                  </TableCell>
+                  <TableCell>{patient.name}</TableCell>
+                  <TableCell>{patient.phone}</TableCell>
+                  <TableCell>{patient.disease}</TableCell>
                 </TableRow>
               ))
             )}
@@ -172,3 +219,26 @@ export default function Dashboard() {
     </Box>
   );
 }
+
+// Styles
+const cardStyle = {
+  p: 4,
+  borderRadius: "16px",
+  border: "1px solid #e2e8f0",
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+  },
+};
+
+const tableStyle = {
+  borderRadius: "16px",
+  border: "1px solid #e2e8f0",
+  overflow: "hidden",
+};
+
+const headCell = {
+  fontSize: "16px",
+  fontWeight: 700,
+};

@@ -4,6 +4,7 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import InsightsIcon from "@mui/icons-material/Insights";
 import PeopleIcon from "@mui/icons-material/People";
 import SecurityIcon from "@mui/icons-material/Security";
+import { motion } from "framer-motion";
 import DescriptionIcon from "@mui/icons-material/Description";
 
 const features = [
@@ -41,7 +42,10 @@ const features = [
 
 export default function Features() {
   return (
-    <Box sx={{ py: 10, px: { xs: 3, md: 8 }, background: "#f8fafc" }}>
+    <Box   component={motion.div}
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.5 }}sx={{ py: 10, px: { xs: 3, md: 8 }, background: "#f8fafc" }}>
       
       <Typography
         variant="h4"

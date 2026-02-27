@@ -16,6 +16,7 @@ export default function Form() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState(""); // ✅ NEW
   const [disease, setDisease] = useState("");
   const [otherDisease, setOtherDisease] = useState("");
 
@@ -25,11 +26,14 @@ export default function Form() {
     const selectedDisease =
       disease === "Other" ? otherDisease : disease;
 
+    // ✅ patient now includes email
     const newPatient = {
       id: Date.now(),
       name,
       phone,
+      email,
       disease: selectedDisease,
+      status: "Pending",
       createdAt: new Date().toISOString(),
     };
 
@@ -41,10 +45,11 @@ export default function Form() {
       JSON.stringify([...existingPatients, newPatient])
     );
 
-    alert("Patient Saved ");
+    alert("Patient Saved ✅");
 
     setName("");
     setPhone("");
+    setEmail("");
     setDisease("");
     setOtherDisease("");
   };
@@ -70,7 +75,6 @@ export default function Form() {
           boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
         }}
       >
-        {/* Header */}
         <Typography variant="h4" fontWeight="bold" gutterBottom>
           Patient Registration
         </Typography>
@@ -85,7 +89,6 @@ export default function Form() {
           <Stack spacing={3}>
             <TextField
               label="Patient Name"
-              variant="outlined"
               fullWidth
               required
               value={name}
@@ -94,11 +97,20 @@ export default function Form() {
 
             <TextField
               label="Phone Number"
-              variant="outlined"
               fullWidth
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+            />
+
+            {/* ✅ NEW EMAIL FIELD */}
+            <TextField
+              label="Email Address"
+              type="email"
+              fullWidth
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
 
             <TextField
@@ -122,13 +134,10 @@ export default function Form() {
                 fullWidth
                 required
                 value={otherDisease}
-                onChange={(e) =>
-                  setOtherDisease(e.target.value)
-                }
+                onChange={(e) => setOtherDisease(e.target.value)}
               />
             )}
 
-            {/* Buttons Row */}
             <Stack direction="row" spacing={2} mt={2}>
               <Button
                 type="submit"
@@ -139,9 +148,7 @@ export default function Form() {
                   textTransform: "none",
                   py: 1.3,
                   borderRadius: "10px",
-                  "&:hover": {
-                    background: "#1d4ed8",
-                  },
+                  "&:hover": { background: "#1d4ed8" },
                 }}
               >
                 Save Patient
@@ -151,10 +158,7 @@ export default function Form() {
                 variant="outlined"
                 fullWidth
                 onClick={() => navigate("/records")}
-                sx={{
-                  textTransform: "none",
-                  borderRadius: "10px",
-                }}
+                sx={{ textTransform: "none", borderRadius: "10px" }}
               >
                 View Records
               </Button>
