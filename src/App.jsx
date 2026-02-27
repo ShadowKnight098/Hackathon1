@@ -4,9 +4,11 @@ import Home from "./pages/Home";
 import Form from "./pages/Form";
 import Record from "./pages/Record";
 import Contact from "./pages/contact";
+import Footer from "./components/footer";
 
 function App() {
   return (
+    <>
     <Router>
       <Navbar />
 
@@ -18,6 +20,9 @@ function App() {
         <Route path="/login" element={<Contact />} />
       </Routes>
     </Router>
+    <Footer/>
+    </>
+
   );
 }
 
