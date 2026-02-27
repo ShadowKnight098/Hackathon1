@@ -61,10 +61,11 @@ export default function Hero() {
         {/* RIGHT SIDE — IMAGE */}
         <Box flex={1} textAlign="center">
           <img
-            src="/doctor-illustration.png"
+            src="/01.jpg"
             alt="Healthcare Illustration"
             style={{
               width: "100%",
+              borderRadius:"5rem",
               maxWidth: "450px",
             }}
           />
