@@ -4,9 +4,31 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [doctorName, setDoctorName] = useState("");
+
+  useEffect(() => {
+    const loginStatus = localStorage.getItem("isLoggedIn");
+    setIsLoggedIn(loginStatus === "true");
+
+    const doctor = JSON.parse(localStorage.getItem("doctor"));
+    if (doctor && doctor.doctorName) {
+      setDoctorName(doctor.doctorName);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -28,7 +50,6 @@ const Navbar = () => {
             fontWeight: "bold",
             textDecoration: "none",
             color: "white",
-            // fontSize:"2rem"
           }}
         >
           🩺 MoonDev Clinic
@@ -37,66 +58,88 @@ const Navbar = () => {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* Menu */}
-<Stack
-  direction="row"
-  spacing={2}
-  sx={{
-    "& .MuiButton-root": {
-      color: "white",
-      fontWeight: 500,
-      textTransform: "none",
-      borderRadius: "10px",
-      px: 2.5,
-      fontSize:"1.45rem",
-      py: 0.8,
-
-      // ✅ Border always visible
-      border: "1px solid rgba(255,255,255,0.25)",
-
-      // ✅ Smooth animation
-      transition: "all 0.3s ease",
-
-      // ✅ Hover effect
-      "&:hover": {
-        backgroundColor: "rgba(255,255,255,0.08)",
-        borderColor: "#3b82f6",
-        transform: "translateY(-2px)",
-        boxShadow: "0 6px 16px rgba(59,130,246,0.35)",
-      },
-    },
-  }}
->
-          <Button component={Link} to="/" color="inherit">
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            "& .MuiButton-root": {
+              color: "white",
+              fontWeight: 500,
+              textTransform: "none",
+              borderRadius: "10px",
+              px: 2.5,
+              fontSize: "1.5rem",
+              py: 0.8,
+              border: "1px solid rgba(255,255,255,0.25)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.08)",
+                borderColor: "#3b82f6",
+                transform: "translateY(-2px)",
+                boxShadow: "0 6px 16px rgba(59,130,246,0.35)",
+              },
+            },
+          }}
+        >
+          <Button component={Link} to="/">
             Home
           </Button>
 
-          <Button component={Link} to="/form" color="inherit">
+          <Button component={Link} to="/form">
             Patient Form
           </Button>
 
-          <Button component={Link} to="/records" color="inherit">
+          <Button component={Link} to="/records">
             Records
           </Button>
 
-          <Button component={Link} to="/dashboard" color="inherit">
+          <Button component={Link} to="/dashboard">
             Dashboard
           </Button>
 
-          <Button
-            component={Link}
-            to="/login"
-            variant="contained"
-            sx={{
-              background: "#2563EB",
-              px: 3,
-              borderRadius: "10px",
-              "&:hover": {
-                background: "#1d4ed8",
-              },
-            }}
-          >
-            Login
-          </Button>
+          {/* Conditional Button */}
+          {!isLoggedIn ? (
+            <Button
+              component={Link}
+              to="/login"
+              variant="contained"
+              sx={{
+                background: "#2563EB",
+                border: "none",
+                "&:hover": {
+                  background: "#1d4ed8",
+                },
+              }}
+            >
+              Login
+            </Button>
+          ) : (
+            <>
+              <Typography
+                sx={{
+                  color: "#94a3b8",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                Dr. {doctorName}
+              </Typography>
+
+              <Button
+                variant="contained"
+                onClick={handleLogout}
+                sx={{
+                  background: "#dc2626",
+                  border: "none",
+                  "&:hover": {
+                    background: "#b91c1c",
+                  },
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          )}
         </Stack>
       </Toolbar>
     </AppBar>

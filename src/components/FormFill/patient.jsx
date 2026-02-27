@@ -41,7 +41,7 @@ export default function Form() {
       JSON.stringify([...existingPatients, newPatient])
     );
 
-    alert("Patient Saved ✅");
+    alert("Patient Saved ");
 
     setName("");
     setPhone("");

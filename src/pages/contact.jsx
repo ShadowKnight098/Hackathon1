@@ -1,9 +1,11 @@
 import React from 'react'
+import Dashboard from '../components/Dash'
 
 const contact = () => {
   return (
     <>
-    <h1>This is cotact</h1>
+    <Dashboard/>
+    
     
     </>
   )
