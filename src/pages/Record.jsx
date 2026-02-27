@@ -37,7 +37,7 @@ export default function Records() {
     localStorage.getItem("currentDoctor")
   );
 
-  // ✅ Load only logged doctor's patients
+  // ================= LOAD ONLY LOGGED DOCTOR PATIENTS =================
   useEffect(() => {
     const allPatients =
       JSON.parse(localStorage.getItem("patients")) || [];
@@ -51,7 +51,7 @@ export default function Records() {
     setPatients(myPatients);
   }, []);
 
-  // ✅ Safe save (preserve other doctors)
+  // ================= SAFE SAVE =================
   const savePatients = (updatedDoctorPatients) => {
     const allPatients =
       JSON.parse(localStorage.getItem("patients")) || [];
@@ -69,7 +69,7 @@ export default function Records() {
     setPatients(updatedDoctorPatients);
   };
 
-  // EMAIL
+  // ================= EMAIL =================
   const sendTreatmentEmail = (patient) => {
     if (!patient.email) {
       setSnack("Patient email not found ❌");
@@ -87,10 +87,11 @@ export default function Records() {
         },
         "8T0qcnzODMGiNPSLU"
       )
-      .then(() => setSnack("Treatment email sent "))
+      .then(() => setSnack("Email sent successfully "))
       .catch(() => setSnack("Email failed "));
   };
 
+  // ================= DELETE =================
   const confirmDelete = () => {
     const updated = patients.filter((p) => p.id !== deleteId);
     savePatients(updated);
@@ -98,12 +99,13 @@ export default function Records() {
     setSnack("Patient deleted");
   };
 
+  // ================= STATUS CHANGE =================
   const handleStatusChange = (id, newStatus) => {
     const updated = patients.map((p) => {
       if (p.id === id) {
         if (
-          newStatus === "Treatment Done" &&
-          p.status !== "Treatment Done"
+          newStatus === "Complete" &&
+          p.status !== "Complete"
         ) {
           sendTreatmentEmail(p);
         }
@@ -115,6 +117,7 @@ export default function Records() {
     savePatients(updated);
   };
 
+  // ================= EDIT =================
   const handleEditSave = () => {
     const updated = patients.map((p) =>
       p.id === editPatient.id ? editPatient : p
@@ -124,12 +127,14 @@ export default function Records() {
     setSnack("Patient updated");
   };
 
+  // ================= STATUS COLOR =================
   const getStatusColor = (status) => {
     if (status === "Came") return "info";
-    if (status === "Treatment Done") return "success";
-    return "warning";
+    if (status === "Complete") return "success";
+    return "warning"; // Pending
   };
 
+  // ================= FILTER =================
   const filteredPatients = patients
     .filter((p) =>
       Object.values(p)
@@ -143,12 +148,16 @@ export default function Records() {
         : (p.status || "Pending") === statusFilter
     );
 
+  // ================= COUNTS =================
   const total = patients.length;
   const pending = patients.filter(
     (p) => (p.status || "Pending") === "Pending"
   ).length;
-  const done = patients.filter(
-    (p) => p.status === "Treatment Done"
+  const came = patients.filter(
+    (p) => p.status === "Came"
+  ).length;
+  const complete = patients.filter(
+    (p) => p.status === "Complete"
   ).length;
 
   return (
@@ -158,16 +167,16 @@ export default function Records() {
       </Typography>
 
       <Typography sx={{ color: "#64748b", mb: 4, fontSize: "1.1rem" }}>
-        Manage and track your patient records efficiently.
+        Manage and track your patient records.
       </Typography>
 
       <Divider sx={{ mb: 4 }} />
 
-      {/* Summary Cards */}
+      {/* SUMMARY CARDS */}
       <Stack direction="row" spacing={3} mb={5}>
-        {[["Total", total], ["Pending", pending], ["Done", done]].map(
+        {[["Total", total], ["Pending", pending], ["Came", came], ["Complete", complete]].map(
           ([label, value]) => (
-            <Card key={label} sx={{ minWidth: 200 }}>
+            <Card key={label} sx={{ minWidth: 180 }}>
               <CardContent>
                 <Typography fontSize="2.2rem" fontWeight="bold">
                   {value}
@@ -181,7 +190,7 @@ export default function Records() {
         )}
       </Stack>
 
-      {/* Search + Filter */}
+      {/* SEARCH + FILTER */}
       <Stack direction="row" spacing={3} mb={4}>
         <TextField
           label="Search Patient"
@@ -197,11 +206,12 @@ export default function Records() {
         >
           <MenuItem value="All">All</MenuItem>
           <MenuItem value="Pending">Pending</MenuItem>
-          <MenuItem value="Treatment Done">Treatment Done</MenuItem>
+          <MenuItem value="Came">Came</MenuItem>
+          <MenuItem value="Complete">Complete</MenuItem>
         </Select>
       </Stack>
 
-      {/* Table */}
+      {/* TABLE */}
       <Paper sx={{ p: 3 }}>
         <Table>
           <TableHead>
@@ -228,10 +238,24 @@ export default function Records() {
                 <TableCell>{patient.date}</TableCell>
 
                 <TableCell>
-                  <Chip
-                    label={patient.status || "Pending"}
-                    color={getStatusColor(patient.status)}
-                  />
+                  <Stack direction="row" spacing={2}>
+                    <Chip
+                      label={patient.status || "Pending"}
+                      color={getStatusColor(patient.status)}
+                    />
+
+                    <Select
+                      size="small"
+                      value={patient.status || "Pending"}
+                      onChange={(e) =>
+                        handleStatusChange(patient.id, e.target.value)
+                      }
+                    >
+                      <MenuItem value="Pending">Pending</MenuItem>
+                      <MenuItem value="Came">Came</MenuItem>
+                      <MenuItem value="Complete">Complete</MenuItem>
+                    </Select>
+                  </Stack>
                 </TableCell>
 
                 <TableCell align="right">
@@ -251,7 +275,7 @@ export default function Records() {
         </Table>
       </Paper>
 
-      {/* Delete Dialog */}
+      {/* DELETE DIALOG */}
       <Dialog open={Boolean(deleteId)}>
         <DialogTitle>Delete Patient?</DialogTitle>
         <DialogActions>
@@ -262,7 +286,7 @@ export default function Records() {
         </DialogActions>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* EDIT DIALOG */}
       <Dialog open={Boolean(editPatient)} fullWidth>
         <DialogTitle>Edit Patient</DialogTitle>
         {editPatient && (
