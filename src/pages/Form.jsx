@@ -1,12 +1,10 @@
 import React from 'react'
+import Form from '../components/FormFill/patient'
 
 const Task = () => {
   return (
     <>
-    <h1>
-      this is about page
-    </h1>
-    
+    <Form/>
     </>
   )
 }
