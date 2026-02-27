@@ -7,8 +7,12 @@ export default function Hero() {
         minHeight: "80vh",
         display: "flex",
         alignItems: "center",
+        borderRadius:"2rem",
         px: { xs: 3, md: 8 },
+        padding:"2rem",
+        margin:"2rem",
         background: "#F5F7FB",
+        boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px"
       }}
     >
       <Stack
@@ -24,14 +28,22 @@ export default function Hero() {
             variant="h3"
             fontWeight="bold"
             gutterBottom
-            sx={{ color: "#1e293b" }}
+            sx={{ color: "#1e293b",
+              lineHeight:"2",
+              py:"2",
+              
+
+             }}
           >
             Digital Health Records for RMP Clinics
           </Typography>
 
           <Typography
             variant="h6"
-            sx={{ color: "#475569", mb: 3, lineHeight: 1.6 }}
+            sx={{ color: "#475569", mb: 3, lineHeight: 1.6,
+              fontSize:"1.5rem",
+              fontWeight:"500"
+             }}
           >
             Small clinics still rely on paper-based records which leads to
             lost patient history, inefficient appointment management, and
