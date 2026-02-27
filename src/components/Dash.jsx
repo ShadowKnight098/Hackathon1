@@ -28,7 +28,8 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Greeting
+  /* ================= GREETING ================= */
+
   const hour = new Date().getHours();
   const greeting =
     hour < 12
@@ -37,9 +38,7 @@ export default function Dashboard() {
       ? "Good Afternoon"
       : "Good Evening";
 
-  // ======================
-  // 📊 BASIC STATS
-  // ======================
+  /* ================= BASIC STATS ================= */
 
   const totalPatients = patients.length;
 
@@ -48,24 +47,37 @@ export default function Dashboard() {
     return new Date(p.createdAt).toDateString() === today;
   }).length;
 
-  // ======================
-  // 👨‍⚕️ DOCTOR PERFORMANCE
-  // ======================
+  /* ================= DOCTOR ANALYTICS ================= */
 
-  const doctorCounts = patients.reduce((acc, patient) => {
+  const doctorAnalytics = patients.reduce((acc, patient) => {
     const doctor = patient.doctorName || "Unknown";
-    acc[doctor] = (acc[doctor] || 0) + 1;
+
+    if (!acc[doctor]) {
+      acc[doctor] = {
+        totalCases: 0,
+        diseases: {},
+        patients: [],
+      };
+    }
+
+    acc[doctor].totalCases += 1;
+
+    const disease = patient.disease || "Unknown";
+    acc[doctor].diseases[disease] =
+      (acc[doctor].diseases[disease] || 0) + 1;
+
+    acc[doctor].patients.push(patient.name);
+
     return acc;
   }, {});
 
-  const doctorEntries = Object.entries(doctorCounts);
+  const doctorData = Object.entries(doctorAnalytics);
 
   const topDoctor =
-    doctorEntries.sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+    doctorData.sort((a, b) => b[1].totalCases - a[1].totalCases)[0]?.[0] ||
+    "N/A";
 
-  // ======================
-  // 🦠 DISEASE ANALYTICS
-  // ======================
+  /* ================= DISEASE ANALYTICS ================= */
 
   const diseaseCounts = patients.reduce((acc, patient) => {
     acc[patient.disease] = (acc[patient.disease] || 0) + 1;
@@ -73,9 +85,8 @@ export default function Dashboard() {
   }, {});
 
   const mostCommonDisease =
-    Object.entries(diseaseCounts).sort(
-      (a, b) => b[1] - a[1]
-    )[0]?.[0] || "N/A";
+    Object.entries(diseaseCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+    "N/A";
 
   const recentPatients = [...patients].reverse().slice(0, 5);
 
@@ -94,7 +105,7 @@ export default function Dashboard() {
     >
       {/* HEADER */}
       <Typography variant="h4" fontWeight="bold">
-        {greeting}, Dr. {doctorName || "Admin"} 👋
+        {greeting}, Dr. {doctorName || "Admin"}
       </Typography>
 
       <Typography sx={{ color: "#64748b", mb: 4 }}>
@@ -105,7 +116,7 @@ export default function Dashboard() {
       <Grid container spacing={3} mb={5}>
         <StatCard title="Total Patients" value={totalPatients} />
         <StatCard title="Patients Today" value={todayPatients} />
-        <StatCard title="Top Doctor 🏆" value={topDoctor} />
+        <StatCard title="Top Doctor" value={topDoctor} />
         <StatCard
           title="Most Common Disease"
           value={mostCommonDisease}
@@ -116,7 +127,7 @@ export default function Dashboard() {
 
       {/* ================= DOCTOR PERFORMANCE ================= */}
       <Typography variant="h6" fontWeight="bold" mb={2}>
-        Doctor Performance
+        Doctor Analytics
       </Typography>
 
       <Paper sx={tableStyle}>
@@ -124,12 +135,14 @@ export default function Dashboard() {
           <TableHead sx={{ background: "#f1f5f9" }}>
             <TableRow>
               <TableCell sx={headCell}>Doctor</TableCell>
-              <TableCell sx={headCell}>Cases Handled</TableCell>
+              <TableCell sx={headCell}>Cases</TableCell>
+              <TableCell sx={headCell}>Diseases Treated</TableCell>
+              <TableCell sx={headCell}>Patients</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {doctorEntries.map(([doctor, count]) => (
+            {doctorData.map(([doctor, data]) => (
               <TableRow
                 key={doctor}
                 sx={
@@ -139,7 +152,16 @@ export default function Dashboard() {
                 }
               >
                 <TableCell>{doctor}</TableCell>
-                <TableCell>{count}</TableCell>
+                <TableCell>{data.totalCases}</TableCell>
+
+                <TableCell>
+                  {Object.keys(data.diseases).join(", ")}
+                </TableCell>
+
+                <TableCell>
+                  {data.patients.slice(0, 3).join(", ")}
+                  {data.patients.length > 3 && " ..."}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -186,7 +208,7 @@ export default function Dashboard() {
   );
 }
 
-/* ================= COMPONENTS ================= */
+/* ================= COMPONENT ================= */
 
 function StatCard({ title, value }) {
   return (

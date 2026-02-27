@@ -31,7 +31,7 @@ export default function Login() {
     );
 
     if (alreadyExists) {
-      alert("Doctor already registered ❌");
+      alert("Doctor already registered ");
       return;
     }
 
@@ -46,7 +46,7 @@ export default function Login() {
 
     localStorage.setItem("doctors", JSON.stringify(doctors));
 
-    alert("Registration Successful ✅");
+    alert("Registration Successful ");
     setIsRegister(false);
   };
 
@@ -72,7 +72,7 @@ export default function Login() {
 
       navigate("/dashboard");
     } else {
-      alert("Invalid Credentials ❌");
+      alert("Invalid Credentials ");
     }
   };
 
