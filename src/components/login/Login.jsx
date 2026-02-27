@@ -18,36 +18,58 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [doctorName, setDoctorName] = useState("");
 
-  // REGISTER
+  // ================= REGISTER =================
   const handleRegister = (e) => {
     e.preventDefault();
 
-    const doctor = {
+    const doctors =
+      JSON.parse(localStorage.getItem("doctors")) || [];
+
+    // check duplicate email
+    const alreadyExists = doctors.find(
+      (doc) => doc.email === email
+    );
+
+    if (alreadyExists) {
+      alert("Doctor already registered ❌");
+      return;
+    }
+
+    const newDoctor = {
+      id: Date.now(),
       doctorName,
       email,
       password,
     };
 
-    localStorage.setItem("doctor", JSON.stringify(doctor));
+    doctors.push(newDoctor);
+
+    localStorage.setItem("doctors", JSON.stringify(doctors));
 
     alert("Registration Successful ✅");
     setIsRegister(false);
   };
 
-  // LOGIN
+  // ================= LOGIN =================
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const savedDoctor = JSON.parse(
-      localStorage.getItem("doctor")
+    const doctors =
+      JSON.parse(localStorage.getItem("doctors")) || [];
+
+    const foundDoctor = doctors.find(
+      (doc) => doc.email === email && doc.password === password
     );
 
-    if (
-      savedDoctor &&
-      email === savedDoctor.email &&
-      password === savedDoctor.password
-    ) {
+    if (foundDoctor) {
+      // store logged doctor
+      localStorage.setItem(
+        "currentDoctor",
+        JSON.stringify(foundDoctor)
+      );
+
       localStorage.setItem("isLoggedIn", "true");
+
       navigate("/dashboard");
     } else {
       alert("Invalid Credentials ❌");
@@ -55,62 +77,65 @@ export default function Login() {
   };
 
   return (
-<Box
-  sx={{
-    minHeight: "100vh",
-    backgroundImage: "url('https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    filter:"blur()",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  }}
->
     <Box
-  sx={{
-    position: "absolute",
-    inset: 0,
-    background: "rgba(15,23,42,0.65)",
-    backdropFilter: "blur(4px)",
-  }}
-/>
-<Paper
-  sx={{
-    position: "relative",
-    zIndex: 1,
-    width: "100%",
-    maxWidth: "420px",
-    p: 5,
-    borderRadius: "20px",
-    background: "rgba(255,255,255,0.95)",
-    backdropFilter: "blur(10px)",
-  }}
->
-  
-        <Typography variant="h4" fontWeight="bold" gutterBottom fontSize={"2.5rem"}>
+      sx={{
+        minHeight: "100vh",
+        backgroundImage:
+          "url('https://images.pexels.com/photos/4021775/pexels-photo-4021775.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative",
+      }}
+    >
+      {/* Dark Overlay */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background: "rgba(15,23,42,0.65)",
+          backdropFilter: "blur(4px)",
+        }}
+      />
+
+      <Paper
+        sx={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: "420px",
+          p: 5,
+          borderRadius: "20px",
+          background: "rgba(255,255,255,0.95)",
+        }}
+      >
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          gutterBottom
+          fontSize={"2.5rem"}
+        >
           {isRegister ? "Doctor Register" : "Clinic Login"}
         </Typography>
 
         <form onSubmit={isRegister ? handleRegister : handleLogin}>
           <Stack spacing={2}>
-            
-            {/* Register only field */}
             {isRegister && (
-              <TextField 
+              <TextField
                 label="Doctor Name"
-            
                 required
                 value={doctorName}
-                onChange={(e) => setDoctorName(e.target.value)}
+                onChange={(e) =>
+                  setDoctorName(e.target.value)
+                }
               />
             )}
 
             <TextField
               label="Email"
               type="email"
-              size="medium"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -132,7 +157,7 @@ export default function Login() {
                 background: "#2563EB",
                 textTransform: "none",
                 py: 1.2,
-                fontSize:"1.55rem",
+                fontSize: "1.2rem",
                 borderRadius: "10px",
               }}
             >
@@ -141,13 +166,12 @@ export default function Login() {
           </Stack>
         </form>
 
-        {/* Toggle Text */}
         <Typography
           sx={{
             mt: 3,
             textAlign: "center",
             cursor: "pointer",
-            fontSize:"1.5rem",
+            fontSize: "1.2rem",
             color: "#2563EB",
           }}
           onClick={() => setIsRegister(!isRegister)}

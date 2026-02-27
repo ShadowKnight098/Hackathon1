@@ -16,7 +16,7 @@ export default function Form() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState(""); // ✅ NEW
+  const [email, setEmail] = useState("");
   const [disease, setDisease] = useState("");
   const [otherDisease, setOtherDisease] = useState("");
 
@@ -26,7 +26,18 @@ export default function Form() {
     const selectedDisease =
       disease === "Other" ? otherDisease : disease;
 
-    // ✅ patient now includes email
+    // 🔥 Get logged in doctor
+    const currentDoctor = JSON.parse(
+      localStorage.getItem("currentDoctor")
+    );
+
+    if (!currentDoctor) {
+      alert("No doctor logged in ❌");
+      return;
+    }
+
+    const now = new Date();
+
     const newPatient = {
       id: Date.now(),
       name,
@@ -34,7 +45,18 @@ export default function Form() {
       email,
       disease: selectedDisease,
       status: "Pending",
-      createdAt: new Date().toISOString(),
+
+      // ✅ Multi-doctor support
+      doctorId: currentDoctor.id,
+      doctorName: currentDoctor.doctorName,
+
+      // ✅ Timestamp
+      createdAt: now.toISOString(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
 
     const existingPatients =
@@ -45,7 +67,7 @@ export default function Form() {
       JSON.stringify([...existingPatients, newPatient])
     );
 
-    alert("Patient Saved ✅");
+    alert("Patient Saved Successfully ✅");
 
     setName("");
     setPhone("");
@@ -80,7 +102,7 @@ export default function Form() {
         </Typography>
 
         <Typography sx={{ color: "#64748b", mb: 4 }}>
-          Enter patient details below to add them to the clinic system.
+          Enter patient details below to add them to the hospital system.
         </Typography>
 
         <Divider sx={{ mb: 4 }} />
@@ -103,7 +125,6 @@ export default function Form() {
               onChange={(e) => setPhone(e.target.value)}
             />
 
-            {/* ✅ NEW EMAIL FIELD */}
             <TextField
               label="Email Address"
               type="email"
@@ -134,7 +155,9 @@ export default function Form() {
                 fullWidth
                 required
                 value={otherDisease}
-                onChange={(e) => setOtherDisease(e.target.value)}
+                onChange={(e) =>
+                  setOtherDisease(e.target.value)
+                }
               />
             )}
 
@@ -158,7 +181,10 @@ export default function Form() {
                 variant="outlined"
                 fullWidth
                 onClick={() => navigate("/records")}
-                sx={{ textTransform: "none", borderRadius: "10px" }}
+                sx={{
+                  textTransform: "none",
+                  borderRadius: "10px",
+                }}
               >
                 View Records
               </Button>

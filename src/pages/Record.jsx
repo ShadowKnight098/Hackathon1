@@ -20,6 +20,7 @@ import {
   Card,
   CardContent,
   Snackbar,
+  Divider,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import emailjs from "@emailjs/browser";
@@ -32,17 +33,43 @@ export default function Records() {
   const [editPatient, setEditPatient] = useState(null);
   const [snack, setSnack] = useState("");
 
+  const currentDoctor = JSON.parse(
+    localStorage.getItem("currentDoctor")
+  );
+
+  // ✅ Load only logged doctor's patients
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("patients")) || [];
-    setPatients(stored);
+    const allPatients =
+      JSON.parse(localStorage.getItem("patients")) || [];
+
+    if (!currentDoctor) return;
+
+    const myPatients = allPatients.filter(
+      (p) => p.doctorId === currentDoctor.id
+    );
+
+    setPatients(myPatients);
   }, []);
 
-  const savePatients = (updated) => {
-    setPatients(updated);
-    localStorage.setItem("patients", JSON.stringify(updated));
+  // ✅ Safe save (preserve other doctors)
+  const savePatients = (updatedDoctorPatients) => {
+    const allPatients =
+      JSON.parse(localStorage.getItem("patients")) || [];
+
+    const otherDoctorsPatients = allPatients.filter(
+      (p) => p.doctorId !== currentDoctor.id
+    );
+
+    const merged = [
+      ...otherDoctorsPatients,
+      ...updatedDoctorPatients,
+    ];
+
+    localStorage.setItem("patients", JSON.stringify(merged));
+    setPatients(updatedDoctorPatients);
   };
 
-  // 🔥 EMAIL FUNCTION
+  // EMAIL
   const sendTreatmentEmail = (patient) => {
     if (!patient.email) {
       setSnack("Patient email not found ❌");
@@ -51,32 +78,26 @@ export default function Records() {
 
     emailjs
       .send(
-        "service_wspnj8c",      
-        "template_vc9xi8v",     
+        "service_wspnj8c",
+        "template_vc9xi8v",
         {
           name: patient.name,
           disease: patient.disease,
           email: patient.email,
         },
-        "8T0qcnzODMGiNPSLU"       
+        "8T0qcnzODMGiNPSLU"
       )
-      .then(() => {
-        setSnack("Treatment email sent ");
-      })
-      .catch((error) => {
-        console.error(error);
-        setSnack("Email failed ");
-      });
+      .then(() => setSnack("Treatment email sent "))
+      .catch(() => setSnack("Email failed "));
   };
 
   const confirmDelete = () => {
     const updated = patients.filter((p) => p.id !== deleteId);
     savePatients(updated);
     setDeleteId(null);
-    setSnack("Patient deleted successfully");
+    setSnack("Patient deleted");
   };
 
-  // 🔥 STATUS CHANGE WITH EMAIL TRIGGER
   const handleStatusChange = (id, newStatus) => {
     const updated = patients.map((p) => {
       if (p.id === id) {
@@ -92,7 +113,6 @@ export default function Records() {
     });
 
     savePatients(updated);
-    setSnack("Status updated");
   };
 
   const handleEditSave = () => {
@@ -101,7 +121,7 @@ export default function Records() {
     );
     savePatients(updated);
     setEditPatient(null);
-    setSnack("Patient updated successfully");
+    setSnack("Patient updated");
   };
 
   const getStatusColor = (status) => {
@@ -127,27 +147,32 @@ export default function Records() {
   const pending = patients.filter(
     (p) => (p.status || "Pending") === "Pending"
   ).length;
-  const came = patients.filter((p) => p.status === "Came").length;
   const done = patients.filter(
     (p) => p.status === "Treatment Done"
   ).length;
 
   return (
-    <Box sx={{ minHeight: "100vh", background: "#f8fafc", p: 5 }}>
-      <Typography variant="h3" fontWeight="bold" mb={4}>
-        Patient Records
+    <Box sx={{ minHeight: "100vh", background: "#f8fafc", p: 6 }}>
+      <Typography variant="h4" fontWeight="bold" mb={1}>
+        Dr. {currentDoctor?.doctorName}'s Patients
       </Typography>
 
-      {/* Dashboard */}
-      <Stack direction="row" spacing={3} mb={4} flexWrap="wrap">
-        {[["Total", total], ["Pending", pending], ["Came", came], ["Done", done]].map(
+      <Typography sx={{ color: "#64748b", mb: 4, fontSize: "1.1rem" }}>
+        Manage and track your patient records efficiently.
+      </Typography>
+
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Summary Cards */}
+      <Stack direction="row" spacing={3} mb={5}>
+        {[["Total", total], ["Pending", pending], ["Done", done]].map(
           ([label, value]) => (
-            <Card key={label} sx={{ minWidth: 180 }}>
+            <Card key={label} sx={{ minWidth: 200 }}>
               <CardContent>
-                <Typography fontSize="2rem" fontWeight="bold">
+                <Typography fontSize="2.2rem" fontWeight="bold">
                   {value}
                 </Typography>
-                <Typography color="text.secondary">
+                <Typography fontSize="1.1rem" color="text.secondary">
                   {label}
                 </Typography>
               </CardContent>
@@ -157,9 +182,9 @@ export default function Records() {
       </Stack>
 
       {/* Search + Filter */}
-      <Stack direction={{ xs: "column", md: "row" }} spacing={3} mb={4}>
+      <Stack direction="row" spacing={3} mb={4}>
         <TextField
-          label="Search"
+          label="Search Patient"
           fullWidth
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -168,26 +193,28 @@ export default function Records() {
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 180 }}
+          sx={{ minWidth: 200 }}
         >
           <MenuItem value="All">All</MenuItem>
           <MenuItem value="Pending">Pending</MenuItem>
-          <MenuItem value="Came">Came</MenuItem>
           <MenuItem value="Treatment Done">Treatment Done</MenuItem>
         </Select>
       </Stack>
 
       {/* Table */}
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 3 }}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Disease</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Action</TableCell>
+              <TableCell sx={headStyle}>ID</TableCell>
+              <TableCell sx={headStyle}>Name</TableCell>
+              <TableCell sx={headStyle}>Phone</TableCell>
+              <TableCell sx={headStyle}>Disease</TableCell>
+              <TableCell sx={headStyle}>Date</TableCell>
+              <TableCell sx={headStyle}>Status</TableCell>
+              <TableCell sx={headStyle} align="right">
+                Action
+              </TableCell>
             </TableRow>
           </TableHead>
 
@@ -198,35 +225,19 @@ export default function Records() {
                 <TableCell>{patient.name}</TableCell>
                 <TableCell>{patient.phone}</TableCell>
                 <TableCell>{patient.disease}</TableCell>
+                <TableCell>{patient.date}</TableCell>
 
                 <TableCell>
-                  <Stack direction="row" spacing={2}>
-                    <Chip
-                      label={patient.status || "Pending"}
-                      color={getStatusColor(patient.status)}
-                    />
-
-                    <Select
-                      size="small"
-                      value={patient.status || "Pending"}
-                      onChange={(e) =>
-                        handleStatusChange(patient.id, e.target.value)
-                      }
-                    >
-                      <MenuItem value="Pending">Pending</MenuItem>
-                      <MenuItem value="Came">Came</MenuItem>
-                      <MenuItem value="Treatment Done">
-                        Treatment Done
-                      </MenuItem>
-                    </Select>
-                  </Stack>
+                  <Chip
+                    label={patient.status || "Pending"}
+                    color={getStatusColor(patient.status)}
+                  />
                 </TableCell>
 
                 <TableCell align="right">
                   <Button onClick={() => setEditPatient(patient)}>
                     Edit
                   </Button>
-
                   <Button
                     color="error"
                     onClick={() => setDeleteId(patient.id)}
@@ -296,3 +307,8 @@ export default function Records() {
     </Box>
   );
 }
+
+const headStyle = {
+  fontSize: "1.1rem",
+  fontWeight: "bold",
+};
