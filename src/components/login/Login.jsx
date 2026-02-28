@@ -13,10 +13,9 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [isRegister, setIsRegister] = useState(false);
-
+  const [doctorName, setDoctorName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [doctorName, setDoctorName] = useState("");
 
   // ================= REGISTER =================
   const handleRegister = (e) => {
@@ -25,13 +24,13 @@ export default function Login() {
     const doctors =
       JSON.parse(localStorage.getItem("doctors")) || [];
 
-    // check duplicate email
+    // prevent duplicate email
     const alreadyExists = doctors.find(
       (doc) => doc.email === email
     );
 
     if (alreadyExists) {
-      alert("Doctor already registered ");
+      alert("Doctor already registered ❌");
       return;
     }
 
@@ -44,10 +43,19 @@ export default function Login() {
 
     doctors.push(newDoctor);
 
+    // save all doctors
     localStorage.setItem("doctors", JSON.stringify(doctors));
 
-    alert("Registration Successful ");
-    setIsRegister(false);
+    // auto login
+    localStorage.setItem(
+      "currentDoctor",
+      JSON.stringify(newDoctor)
+    );
+    localStorage.setItem("isLoggedIn", "true");
+
+    alert("Registration Successful ✅");
+
+    navigate("/dashboard");
   };
 
   // ================= LOGIN =================
@@ -58,22 +66,24 @@ export default function Login() {
       JSON.parse(localStorage.getItem("doctors")) || [];
 
     const foundDoctor = doctors.find(
-      (doc) => doc.email === email && doc.password === password
+      (doc) =>
+        doc.email === email && doc.password === password
     );
 
-    if (foundDoctor) {
-      // store logged doctor
-      localStorage.setItem(
-        "currentDoctor",
-        JSON.stringify(foundDoctor)
-      );
-
-      localStorage.setItem("isLoggedIn", "true");
-
-      navigate("/dashboard");
-    } else {
-      alert("Invalid Credentials ");
+    if (!foundDoctor) {
+      alert("Invalid Credentials ❌");
+      return;
     }
+
+    // store logged doctor
+    localStorage.setItem(
+      "currentDoctor",
+      JSON.stringify(foundDoctor)
+    );
+
+    localStorage.setItem("isLoggedIn", "true");
+
+    navigate("/dashboard");
   };
 
   return (
@@ -90,7 +100,7 @@ export default function Login() {
         position: "relative",
       }}
     >
-      {/* Dark Overlay */}
+      {/* Overlay */}
       <Box
         sx={{
           position: "absolute",
@@ -100,6 +110,7 @@ export default function Login() {
         }}
       />
 
+      {/* Card */}
       <Paper
         sx={{
           position: "relative",
@@ -109,19 +120,21 @@ export default function Login() {
           p: 5,
           borderRadius: "20px",
           background: "rgba(255,255,255,0.95)",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
         }}
       >
         <Typography
           variant="h4"
           fontWeight="bold"
-          gutterBottom
-          fontSize={"2.5rem"}
+          mb={3}
+          textAlign="center"
         >
           {isRegister ? "Doctor Register" : "Clinic Login"}
         </Typography>
 
         <form onSubmit={isRegister ? handleRegister : handleLogin}>
           <Stack spacing={2}>
+            {/* Doctor Name (Register only) */}
             {isRegister && (
               <TextField
                 label="Doctor Name"
@@ -153,12 +166,15 @@ export default function Login() {
               type="submit"
               variant="contained"
               sx={{
-                mt: 2,
+                mt: 1,
                 background: "#2563EB",
                 textTransform: "none",
-                py: 1.2,
-                fontSize: "1.2rem",
+                py: 1.3,
+                fontSize: "1.1rem",
                 borderRadius: "10px",
+                "&:hover": {
+                  background: "#1d4ed8",
+                },
               }}
             >
               {isRegister ? "Register" : "Login"}
@@ -166,13 +182,14 @@ export default function Login() {
           </Stack>
         </form>
 
+        {/* Toggle */}
         <Typography
           sx={{
             mt: 3,
             textAlign: "center",
             cursor: "pointer",
-            fontSize: "1.2rem",
             color: "#2563EB",
+            fontWeight: 500,
           }}
           onClick={() => setIsRegister(!isRegister)}
         >

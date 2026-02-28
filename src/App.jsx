@@ -7,6 +7,7 @@ import Contact from "./pages/contact";
 import Footer from "./components/footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/login";
+import Appointment from "./components/home/appointment/ap1";
 
 function App() {
   return (
@@ -17,16 +18,17 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/form" element={<Form />} />
-   <Route
-  path="/records"
-  element={
-    <ProtectedRoute>
-      <Record />
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/records"
+            element={
+              <ProtectedRoute>
+                <Record />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/dashboard" element={<Contact />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/appointment" element={<Appointment/>}/>
+          <Route path="/login" element={<Login/> }/>
         </Routes>
       </Router>
       <Footer />

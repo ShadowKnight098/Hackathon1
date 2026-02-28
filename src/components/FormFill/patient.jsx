@@ -26,7 +26,7 @@ export default function Form() {
     const selectedDisease =
       disease === "Other" ? otherDisease : disease;
 
-    // 🔥 Get logged in doctor
+    // ✅ Get logged doctor
     const currentDoctor = JSON.parse(
       localStorage.getItem("currentDoctor")
     );
@@ -46,11 +46,11 @@ export default function Form() {
       disease: selectedDisease,
       status: "Pending",
 
-      // ✅ Multi-doctor support
+      // ✅ multi doctor support
       doctorId: currentDoctor.id,
       doctorName: currentDoctor.doctorName,
 
-      // ✅ Timestamp
+      // ✅ timestamp
       createdAt: now.toISOString(),
       date: now.toLocaleDateString(),
       time: now.toLocaleTimeString([], {
@@ -67,13 +67,23 @@ export default function Form() {
       JSON.stringify([...existingPatients, newPatient])
     );
 
+    // 🔥 TOAST TRIGGER (important)
+    localStorage.setItem("newPatientAdded", "true");
+
+    // optional: store latest patient name
+    localStorage.setItem("latestPatient", name);
+
     alert("Patient Saved Successfully ✅");
 
+    // reset form
     setName("");
     setPhone("");
     setEmail("");
     setDisease("");
     setOtherDisease("");
+
+    // optional redirect
+    navigate("/records");
   };
 
   return (

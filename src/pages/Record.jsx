@@ -4,7 +4,7 @@ import {
   Paper,
   Table,
   TableHead,
-  TableRow,
+  TableRow, 
   TableCell,
   TableBody,
   TextField,
@@ -33,6 +33,9 @@ export default function Records() {
   const [editPatient, setEditPatient] = useState(null);
   const [snack, setSnack] = useState("");
 
+  // ✅ NEW TOAST STATE
+  const [newPatientToast, setNewPatientToast] = useState(false);
+
   const currentDoctor = JSON.parse(
     localStorage.getItem("currentDoctor")
   );
@@ -49,6 +52,16 @@ export default function Records() {
     );
 
     setPatients(myPatients);
+  }, []);
+
+  // ✅ CHECK NEW PATIENT FLAG (ONLY ADDITION)
+  useEffect(() => {
+    const flag = localStorage.getItem("newPatientAdded");
+
+    if (flag === "true") {
+      setNewPatientToast(true);
+      localStorage.removeItem("newPatientAdded");
+    }
   }, []);
 
   // ================= SAFE SAVE =================
@@ -131,7 +144,7 @@ export default function Records() {
   const getStatusColor = (status) => {
     if (status === "Came") return "info";
     if (status === "Complete") return "success";
-    return "warning"; // Pending
+    return "warning";
   };
 
   // ================= FILTER =================
@@ -172,7 +185,6 @@ export default function Records() {
 
       <Divider sx={{ mb: 4 }} />
 
-      {/* SUMMARY CARDS */}
       <Stack direction="row" spacing={3} mb={5}>
         {[["Total", total], ["Pending", pending], ["Came", came], ["Complete", complete]].map(
           ([label, value]) => (
@@ -190,7 +202,6 @@ export default function Records() {
         )}
       </Stack>
 
-      {/* SEARCH + FILTER */}
       <Stack direction="row" spacing={3} mb={4}>
         <TextField
           label="Search Patient"
@@ -211,7 +222,6 @@ export default function Records() {
         </Select>
       </Stack>
 
-      {/* TABLE */}
       <Paper sx={{ p: 3 }}>
         <Table>
           <TableHead>
@@ -275,7 +285,6 @@ export default function Records() {
         </Table>
       </Paper>
 
-      {/* DELETE DIALOG */}
       <Dialog open={Boolean(deleteId)}>
         <DialogTitle>Delete Patient?</DialogTitle>
         <DialogActions>
@@ -286,7 +295,6 @@ export default function Records() {
         </DialogActions>
       </Dialog>
 
-      {/* EDIT DIALOG */}
       <Dialog open={Boolean(editPatient)} fullWidth>
         <DialogTitle>Edit Patient</DialogTitle>
         {editPatient && (
@@ -322,11 +330,21 @@ export default function Records() {
         </DialogActions>
       </Dialog>
 
+      {/* Existing Snackbar */}
       <Snackbar
         open={Boolean(snack)}
         autoHideDuration={3000}
         message={snack}
         onClose={() => setSnack("")}
+      />
+
+      {/* ✅ NEW PATIENT TOAST (Only addition) */}
+      <Snackbar
+        open={newPatientToast}
+        autoHideDuration={4000}
+        message="🆕 New Patient Added!"
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        onClose={() => setNewPatientToast(false)}
       />
     </Box>
   );

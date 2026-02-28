@@ -4,11 +4,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // ✅ added only for refresh logic
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [doctorName, setDoctorName] = useState("");
@@ -17,14 +18,21 @@ const Navbar = () => {
     const loginStatus = localStorage.getItem("isLoggedIn");
     setIsLoggedIn(loginStatus === "true");
 
-    const doctor = JSON.parse(localStorage.getItem("doctor"));
+    // ✅ FIX: read currentDoctor instead of doctor
+    const doctor = JSON.parse(
+      localStorage.getItem("currentDoctor")
+    );
+
     if (doctor && doctor.doctorName) {
       setDoctorName(doctor.doctorName);
+    } else {
+      setDoctorName("");
     }
-  }, []);
+  }, [location]); // ✅ updates after login/logout
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("currentDoctor"); // ✅ important
     setIsLoggedIn(false);
     navigate("/login");
   };
@@ -96,8 +104,11 @@ const Navbar = () => {
           <Button component={Link} to="/dashboard">
             Dashboard
           </Button>
+          
+          <Button component={Link} to="/appointment">
+            Appointment
+          </Button>
 
-          {/* Conditional Button */}
           {!isLoggedIn ? (
             <Button
               component={Link}
